@@ -24,3 +24,11 @@
   - `Full Suite`: PASS (13/13 tests pass successfully)
   - Status: PASS.
 
+- **2026-05-23 V30.6.27**:
+  - `tests/test_categorization.py`: PASS (30/30 — All 10 sport types, HS exclusion, GEN threshold, college disambiguation)
+  - New tests added: HS football/basketball/baseball stays GEN; NFL URL overrides HS text; MLB/NFL/NHL/NBA/SOCCER specific keyword routing; ATP/WTA disambiguation; NASCAR/Golf/MMA/Boxing sub-routing; College CWS/NCAA tournament; transfer portal; GEN threshold enforcement
+  - Status: **30/30 PASS**.
+- **2026-05-23 V30.6.28**:
+  - `tests/test_categorization.py`: PASS (37/37 — All tests passing successfully)
+  - Coverage: Ed Orgeron (D1Baseball feed no sport evidence falls back to COLLEGE:General), Stillwater High (HS construct excluded), UCF/UCLA Softball Super Regional, seasonal active/peak filters.
+  - Status: **37/37 PASS**.

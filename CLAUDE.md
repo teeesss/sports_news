@@ -12,7 +12,7 @@
 ## ⚙️ Intelligence Engine Migration (V30.6.15)
 - **Scraper**: `Async` + `Playwright` via `StealthNavigator` (Deep Stealth V30.6.24).
 - **Ranking**: Decay-Adjusted "Hot Score" (Time-sensitive weighting).
-- **Categorization**: Strict feed protection and regex word-boundary sport inference.
+- **Categorization**: Case-insensitive lock protection for locked feeds; regex word-boundary inference with escaping to prevent substring collisions (e.g. "beginning" matching "inning" for Baseball).
 - **Timezone**: Mandatory Eastern Time (EDT/EST) standardization using `calendar.timegm()` for UTC-to-Local conversion to prevent machine-drift.
 - **Self-Healing**: Automated "Future Date Purge" in scraper to invalidate poisoned persistence articles (`published_at > now`).
 - **UI Context**: Sync header includes current date `M/D/YY` next to EST label.

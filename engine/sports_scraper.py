@@ -140,108 +140,462 @@ FEEDS = {
 _COLLEGE_KEYWORDS = [
     r'college', r'ncaa', r'recruit', r'commit', r'cfb', r'cbb', r'wcws', r'ncaa\.com', 
     r'varsity', r'd1', r'sec network', r'big ten', r'acc', r'sec', r'pac-12', r'big 12',
-    r'softball', r'baseball'
+    r'fbs', r'fcs', r'college world series', r'cws', r'super regional', r'regional',
+    r'conference championship', r'national signing day', r'transfer portal',
+    r'big east', r'american athletic', r'mountain west', r'sun belt', r'conference usa'
+]
+
+# High school / prep sport indicators — articles with these should NEVER be promoted
+_HIGH_SCHOOL_INDICATORS = re.compile(
+    r'\b(high school|prep school|prep game|state championship|district|sub-state|'
+    r'class [1-6]a|jv|junior varsity|mhsa|ohsaa|nfhs|ihsa|uil|ghsa|ahsaa|'
+    r'region champion|regional champion|sectional|scholastic|prep baseball|prep football|'
+    r'prep basketball|prep softball|preps|high-school)\b'
+    r'|\b[a-z]+ high (?:school|football|basketball|baseball|softball|soccer|hockey|coach|team|player)\b',
+    re.IGNORECASE
+)
+
+# Comprehensive lists of team names / nicknames for pro leagues
+_PRO_TEAMS = {
+    'NFL': [
+        'cowboys', 'chiefs', 'eagles', 'patriots', 'packers', '49ers', 'bills', 'dolphins', 
+        'jets', 'giants', 'commanders', 'bears', 'lions', 'vikings', 'falcons', 'panthers', 
+        'saints', 'buccaneers', 'cardinals', 'rams', 'seahawks', 'ravens', 'bengals', 'browns', 
+        'steelers', 'texans', 'colts', 'jaguars', 'titans', 'broncos', 'raiders', 'chargers'
+    ],
+    'NBA': [
+        'celtics', 'nets', 'knicks', '76ers', 'raptors', 'bulls', 'cavaliers', 'pistons', 
+        'pacers', 'bucks', 'hawks', 'hornets', 'heat', 'orlando magic', 'wizards', 'nuggets', 
+        'timberwolves', 'thunder', 'blazers', 'jazz', 'warriors', 'clippers', 'lakers', 
+        'suns', 'kings', 'mavericks', 'rockets', 'grizzlies', 'pelicans', 'spurs', 'wnba'
+    ],
+    'MLB': [
+        'yankees', 'red sox', 'blue jays', 'orioles', 'rays', 'guardians', 'twins', 'tigers', 
+        'royals', 'white sox', 'astros', 'rangers', 'mariners', 'athletics', 'angels', 
+        'braves', 'phillies', 'mets', 'marlins', 'nationals', 'brewers', 'cubs', 'cardinals', 
+        'reds', 'pirates', 'dodgers', 'diamondbacks', 'padres', 'giants', 'rockies'
+    ],
+    'NHL': [
+        'bruins', 'sabres', 'red wings', 'florida panthers', 'canadiens', 'senators', 'lightning', 
+        'maple leafs', 'hurricanes', 'blue jackets', 'new jersey devils', 'islanders', 'new york rangers', 
+        'flyers', 'penguins', 'capitals', 'blackhawks', 'avalanche', 'dallas stars', 'minnesota wild', 
+        'predators', 'blues', 'winnipeg jets', 'ducks', 'flames', 'oilers', 'los angeles kings', 'kraken', 
+        'sharks', 'canucks', 'golden knights', 'coyotes'
+    ]
+}
+
+# Comprehensive list of Division I College teams and major athletic nicknames
+_COLLEGE_TEAMS = [
+    'lsu', 'alabama', 'crimson tide', 'auburn', 'tigers', 'florida', 'gators', 'georgia', 'bulldogs',
+    'tennessee', 'volunteers', 'vols', 'kentucky', 'wildcats', 'mississippi', 'ole miss', 
+    'mississippi state', 'missouri', 'south carolina', 'gamecocks', 'vanderbilt', 'commodores', 
+    'arkansas', 'razorbacks', 'texas', 'longhorns', 'oklahoma', 'sooners', 'texas a&m', 'aggies',
+    'ohio state', 'buckeyes', 'michigan', 'wolverines', 'penn state', 'nittany lions', 'wisconsin', 
+    'badgers', 'iowa', 'hawkeyes', 'nebraska', 'cornhuskers', 'minnesota', 'golden gophers', 
+    'michigan state', 'spartans', 'indiana', 'hoosiers', 'illinois', 'fighting illini', 'purdue', 
+    'boilermakers', 'northwestern', 'maryland', 'terrapins', 'terps', 'rutgers', 'scarlet knights',
+    'usc', 'trojans', 'ucla', 'bruins', 'oregon', 'ducks', 'washington', 'huskies', 'stanford', 
+    'cardinal', 'california', 'golden bears', 'arizona', 'wildcats', 'arizona state', 'sun devils', 
+    'utah', 'utes', 'colorado', 'buffaloes', 'buffs', 'oregon state', 'beavers', 'washington state', 
+    'cougars', 'cougs', 'clemson', 'florida state', 'seminoles', 'noles', 'miami', 'hurricanes', 
+    'north carolina', 'tar heels', 'unc', 'duke', 'blue devils', 'nc state', 'wolfpack', 
+    'wake forest', 'demon deacons', 'virginia', 'cavaliers', 'wahoos', 'virginia tech', 'hokies', 
+    'pittsburgh', 'panthers', 'louisville', 'cardinals', 'syracuse', 'orange', 'boston college', 
+    'eagles', 'georgia tech', 'yellow jackets', 'notre dame', 'fighting irish', 'byu', 'tcu', 
+    'horned frogs', 'baylor', 'bears', 'houston', 'cougars', 'ucf', 'knights', 'cincinnati', 
+    'bearcats', 'smu', 'mustangs', 'west virginia', 'mountaineers', 'kansas', 'jayhawks', 
+    'kansas state', 'wildcats', 'iowa state', 'cyclones', 'boise state', 'broncos', 'fresno state', 
+    'san diego state', 'aztecs', 'wyoming', 'colorado state', 'rams', 'unlv', 'rebels', 'hawaii', 
+    'rainbow warriors', 'utah state', 'nevada', 'wolf pack', 'san jose state', 'new mexico', 
+    'lobos', 'memphis', 'temple', 'owls', 'ecu', 'pirates', 'usf', 'bulls', 'tulane', 'green wave', 
+    'tulsa', 'golden hurricane', 'marshall', 'thundering herd', 'appalachian state', 'app state', 
+    'coastal carolina', 'chanticleers', 'chants', 'georgia southern', 'georgia state', 
+    'james madison', 'jmu', 'dukes', 'troy', 'south alabama', 'jaguars', 'louisiana', 
+    'ragin cajuns', 'ulm', 'warhawks', 'arkansas state', 'red wolves', 'texas state', 'bobcats', 
+    'southern miss', 'golden eagles', 'wku', 'hilltoppers', 'mtsu', 'blue raiders', 'liberty', 
+    'flames', 'fiu', 'louisiana tech', 'utep', 'miners', 'nmsu', 'sam houston', 'bearkats', 
+    'jacksonville state', 'gonzaga', 'villanova', 'creighton', 'marquette', 'xavier', 'providence',
+    'butler', 'st johns', 'seton hall', 'georgetown', 'wichita state', 'vcu', 'dayton'
 ]
 
 _SPORT_KEYWORDS = {
-    'NBA': [r'nba', r'lebron', r'lakers', r'warriors', r'celtics', r'basketball', r'knicks', r'76ers', r'hoops', r'dunk', r'wnba'],
-    'NFL': [r'nfl', r'mahomes', r'super bowl', r'touchdown', r'cowboys', r'quarterback', r'gridiron', r'football', r'interception', r'touchdowns'],
-    'MLB': [r'mlb', r'ohtani', r'yankees', r'baseball', r'homerun', r'statcast', r'pitcher', r'ballpark', r'strikeout', r'innings', r'homeruns'],
-    'NHL': [r'nhl', r'mcdavid', r'hockey', r'puck', r'stanley cup', r'slapshot', r'skating'],
-    'SOCCER': [r'soccer', r'fifa', r'messi', r'ronaldo', r'premier league', r'champions league', r'fwa', r'united', r'transfer', r'la liga', r'bundesliga', r'football club', r'la-liga'],
-    'RACING': [r'f1', r'formula 1', r'formulaone', r'nascar', r'motogp', r'verstappen', r'lewis hamilton', r'indycar', r'racing', r'paddock', r'grand prix', r'mclaren'],
-    'TENNIS': [r'tennis', r'djokovic', r'federer', r'nadal', r'wimbledon', r'atp', r'wta', r'grand slam'],
-    'GOLF': [r'golf', r'tiger woods', r'masters', r'pga', r'lpga', r'mcilroy', r'fairway'],
-    'WWE': [r'wwe', r'wrestlemania', r'wrestling', r'smackdown', r'raw', r'tko', r'royal rumble'],
-    'FIGHTING': [r'mma', r'ufc', r'boxing', r'mcgregor', r'knockout', r'heavyweight', r'octagon'],
+    'NBA': [
+        r'nba', r'lebron', r'lakers', r'warriors', r'celtics', r'basketball', r'knicks',
+        r'76ers', r'hoops', r'dunk', r'wnba', r'nba draft', r'nba finals', r'three-pointer',
+        r'buzzer beater', r'triple-double', r'double-double', r'fast break', r'slam dunk',
+        r'point guard', r'shooting guard', r'small forward', r'power forward', r'center',
+        r'free throw', r'layup', r'rebound', r'assist', r'turnover', r'steal', r'block',
+        r'curry', r'jokic', r'giannis', r'tatum', r'durant', r'embiid', r'lillard'
+    ],
+    'NFL': [
+        r'nfl', r'mahomes', r'super bowl', r'touchdown', r'cowboys', r'quarterback', r'gridiron',
+        r'football', r'interception', r'touchdowns', r'nfl draft', r'field goal', r'punt',
+        r'blitz', r'sack', r'fumble', r'rushing yard', r'passing yard', r'wide receiver',
+        r'tight end', r'offensive line', r'defensive back', r'cornerback', r'safety',
+        r'linebacker', r'running back', r'fullback', r'offensive coordinator', r'defensive coordinator',
+        r'lamar jackson', r'burrow', r'josh allen', r'dak prescott', r'hurts', r'stroud'
+    ],
+    'MLB': [
+        r'mlb', r'ohtani', r'yankees', r'baseball', r'homerun', r'statcast', r'pitcher',
+        r'ballpark', r'strikeout', r'innings', r'homeruns', r'bullpen', r'foul ball',
+        r'batting average', r'earned run', r'era', r'rbi', r'double play', r'stolen base',
+        r'walk-off', r'no-hitter', r'perfect game', r'designated hitter', r'dh', r'closer',
+        r'setup man', r'catcher', r'shortstop', r'first base', r'second base', r'third base',
+        r'left field', r'center field', r'right field', r'world series', r'spring training',
+        r'mlb trade', r'free agent', r'waivers', r'dfa', r'roster move', r'lineup card',
+        r'judge', r'acuna', r'soto', r'trout', r'betts', r'shohei', r'senga'
+    ],
+    'NHL': [
+        r'nhl', r'mcdavid', r'hockey', r'puck', r'stanley cup', r'slapshot', r'skating',
+        r'nhl draft', r'goalie', r'goaltender', r'penalty kill', r'power play', r'ice time',
+        r'hat trick', r'assist', r'save percentage', r'shutout', r'overtime', r'shootout',
+        r'faceoff', r'icing', r'offsides', r'winger', r'defenseman', r'center ice',
+        r'blue line', r'crease', r'net', r'zamboni', r'rink', r'arena', r'playoff series',
+        r'matthews', r'crosby', r'ovi', r'ovechkin', r'draisaitl', r'makar', r'hedman'
+    ],
+    'SOCCER': [
+        r'soccer', r'fifa', r'messi', r'ronaldo', r'premier league', r'champions league',
+        r'transfer', r'la liga', r'bundesliga', r'football club', r'la-liga', r'serie a',
+        r'ligue 1', r'mls', r'copa', r'euro 2024', r'world cup', r'penalty kick',
+        r'corner kick', r'free kick', r'offside', r'yellow card', r'red card', r'nil',
+        r'hat-trick', r'brace', r'clean sheet', r'keeper', r'goalkeeper', r'striker',
+        r'midfielder', r'winger', r'defender', r'fullback', r'center back', r'formation',
+        r'haaland', r'mbappe', r'vinicius', r'bellingham', r'saka', r'salah'
+    ],
+    'RACING': [
+        r'f1', r'formula 1', r'formulaone', r'nascar', r'motogp', r'verstappen',
+        r'lewis hamilton', r'indycar', r'racing', r'paddock', r'grand prix', r'mclaren',
+        r'pit stop', r'qualifying', r'pole position', r'lap time', r'checkered flag',
+        r'fastest lap', r'drag race', r'stock car', r'oval track', r'street circuit',
+        r'constructor', r'team principal', r'race winner', r'race director',
+        r'norris', r'leclerc', r'perez', r'sainz', r'alonso', r'russell'
+    ],
+    'TENNIS': [
+        r'tennis', r'djokovic', r'federer', r'nadal', r'wimbledon', r'atp', r'wta',
+        r'grand slam', r'us open', r'french open', r'australian open', r'roland garros',
+        r'serve', r'ace', r'double fault', r'break point', r'match point', r'tiebreak',
+        r'deuce', r'volley', r'backhand', r'forehand', r'clay court', r'grass court',
+        r'hard court', r'seed', r'ranking points', r'wild card',
+        r'sinner', r'alcaraz', r'medvedev', r'swiatek', r'sabalenka', r'gauff'
+    ],
+    'GOLF': [
+        r'golf', r'tiger woods', r'masters', r'pga', r'lpga', r'mcilroy', r'fairway',
+        r'birdie', r'eagle', r'bogey', r'par', r'bunker', r'green', r'tee box',
+        r'driver', r'iron', r'wedge', r'putter', r'caddie', r'scorecard', r'leaderboard',
+        r'cut', r'playoff', r'us open', r'british open', r'the open', r'ryder cup',
+        r'liv golf', r'tour championship', r'fedex cup', r'scheffler', r'schauffele'
+    ],
+    'WWE': [
+        r'wwe', r'wrestlemania', r'wrestling', r'smackdown', r'raw', r'tko', r'royal rumble',
+        r'aew', r'pro wrestling', r'championship belt', r'heel', r'babyface', r'kayfabe',
+        r'promo', r'squash match', r'pin fall', r'submission', r'ladder match',
+        r'cage match', r'money in the bank', r'elimination chamber'
+    ],
+    'FIGHTING': [
+        r'mma', r'ufc', r'boxing', r'mcgregor', r'knockout', r'heavyweight', r'octagon',
+        r'title fight', r'main event', r'co-main', r'undercard', r'weigh-in',
+        r'submission', r'rear naked choke', r'armbar', r'triangle', r'decision',
+        r'split decision', r'unanimous decision', r'tko', r'ksi', r'paul brothers',
+        r'canelo', r'fury', r'usyk', r'crawford', r'tank davis'
+    ],
 }
 
-_SOFTBALL_KEYWORDS = [r'softball', r'fastpitch', r'wcws', r'd1softball']
+_SOFTBALL_KEYWORDS = [r'softball', r'fastpitch', r'wcws', r'd1softball', r'circle', r'windmill pitch']
+
+# ─── Seasonal Intelligence ────────────────────────────────────────────────────
+# Sports active (have regular coverage) by calendar month
+_SEASON_ACTIVE = {
+    1:  frozenset(['NBA', 'NHL', 'COLLEGE', 'GOLF', 'RACING', 'WWE', 'FIGHTING', 'SOCCER', 'TENNIS']),
+    2:  frozenset(['NBA', 'NHL', 'COLLEGE', 'GOLF', 'RACING', 'WWE', 'FIGHTING', 'SOCCER']),
+    3:  frozenset(['NBA', 'NHL', 'MLB', 'COLLEGE', 'GOLF', 'RACING', 'WWE', 'FIGHTING', 'SOCCER', 'TENNIS']),
+    4:  frozenset(['NBA', 'NHL', 'MLB', 'COLLEGE', 'GOLF', 'RACING', 'WWE', 'FIGHTING', 'SOCCER', 'TENNIS']),
+    5:  frozenset(['NBA', 'NHL', 'MLB', 'COLLEGE', 'GOLF', 'RACING', 'WWE', 'FIGHTING', 'SOCCER', 'TENNIS']),
+    6:  frozenset(['NBA', 'NHL', 'MLB', 'GOLF', 'RACING', 'WWE', 'FIGHTING', 'SOCCER', 'TENNIS']),
+    7:  frozenset(['MLB', 'GOLF', 'RACING', 'WWE', 'FIGHTING', 'SOCCER', 'TENNIS']),
+    8:  frozenset(['MLB', 'NFL', 'COLLEGE', 'GOLF', 'RACING', 'WWE', 'FIGHTING', 'SOCCER']),
+    9:  frozenset(['NFL', 'MLB', 'COLLEGE', 'GOLF', 'RACING', 'WWE', 'FIGHTING', 'SOCCER', 'TENNIS']),
+    10: frozenset(['NFL', 'MLB', 'COLLEGE', 'NBA', 'NHL', 'GOLF', 'RACING', 'WWE', 'FIGHTING']),
+    11: frozenset(['NFL', 'COLLEGE', 'NBA', 'NHL', 'GOLF', 'RACING', 'WWE', 'FIGHTING']),
+    12: frozenset(['NFL', 'COLLEGE', 'NBA', 'NHL', 'GOLF', 'RACING', 'WWE', 'FIGHTING']),
+}
+# Sports in peak (playoffs/championship) — get 2x score boost to win disambiguation
+_SEASON_PEAK = {
+    3:  frozenset(['COLLEGE']),
+    4:  frozenset(['NBA', 'NHL', 'MLB', 'COLLEGE']),
+    5:  frozenset(['NBA', 'NHL', 'MLB', 'COLLEGE', 'Softball']),  # NBA/NHL Playoffs + NCAA tourneys
+    6:  frozenset(['NBA', 'NHL', 'MLB']),
+    9:  frozenset(['NFL', 'COLLEGE']),
+    10: frozenset(['NFL', 'COLLEGE', 'MLB']),
+    11: frozenset(['NFL', 'COLLEGE', 'NBA', 'NHL']),
+}
+
+# Generic catch-all sources: unclassifiable articles from these are DROPPED
+# Specific sport feeds (ESPN NFL, CBS NHL, etc.) always keep their articles
+_GENERIC_SOURCES = frozenset(['Yahoo Top', 'SBNation', 'FanSided', 'Deadspin'])
+
+# ─── Domain Trust + Category-Locked Sources ────────────────────────────────────────────
+# If an article URL contains any of these domains, return the sport immediately.
+# No scoring, no keywords, no debate. The domain IS the sport.
+_DOMAIN_SPORT_TRUST = {
+    # COLLEGE dedicated
+    'd1baseball.com':               ('COLLEGE', 'Baseball'),
+    'd1softball.com':               ('COLLEGE', 'Softball'),
+    'extrainningsoftball.com':      ('COLLEGE', 'Softball'),
+    'swishappeal.com':              ('COLLEGE', 'W-Basketball'),
+    # NHL dedicated
+    'thehockeynews.com':            ('NHL', 'News'),
+    'sportsnet.ca':                 ('NHL', 'Analysis'),
+    'dailyfaceoff.com':             ('NHL', 'Analysis'),
+    # SOCCER dedicated
+    'caughtoffside.com':            ('SOCCER', 'Transfer'),
+    'marca.com':                    ('SOCCER', 'International'),
+    'goal.com':                     ('SOCCER', 'General'),
+    # GOLF dedicated
+    'bunkered.co.uk':               ('GOLF', 'General'),
+    'geoffshackelford.com':         ('GOLF', 'Analysis'),
+    # TENNIS dedicated
+    'tennis-x.com':                 ('TENNIS', 'ATP/WTA'),
+    'tennishead.net':               ('TENNIS', 'News'),
+    'ubitennis.net':                ('TENNIS', 'News'),
+    'essentiallysports.com':        ('TENNIS', 'News'),
+    # WWE dedicated
+    'wrestleview.com':              ('WWE', 'News'),
+    'fightful.com':                 ('WWE', 'News'),
+    'cagesideseats.com':            ('WWE', 'News'),
+    'pwtorch.com':                  ('WWE', 'News'),
+    # FIGHTING dedicated
+    'badlefthook.com':              ('FIGHTING', 'Boxing'),
+    # RACING dedicated
+    'motorsport.com':               ('RACING', 'General'),
+    'autosport.com':                ('RACING', 'General'),
+    'roadracingworld.com':          ('RACING', 'MOTOGP'),
+    'jayski.com':                   ('RACING', 'NASCAR'),
+    'crash.net':                    ('RACING', 'General'),
+    'motorsportstribune.com':       ('RACING', 'NASCAR'),
+}
+
+# Source names whose FEEDS-declared (primary_cat, sub_cat) are always correct.
+# Articles from these skip _infer_sport entirely — the feed name IS the classification.
+_CATEGORY_LOCKED_SOURCES = frozenset([
+    # COLLEGE dedicated
+    'D1Baseball', 'D1Softball', 'Extra Inning Softball', 'Swish Appeal',
+    # NHL dedicated
+    'The Hockey News', 'Sportsnet NHL', 'Daily Faceoff',
+    # SOCCER dedicated
+    'CaughtOffside', 'Marca - Soccer', 'BBC - Soccer',
+    # GOLF dedicated
+    'Bunkered', 'Geoff Shackelford',
+    # TENNIS dedicated
+    'Tennis-X', 'Tennis Head', 'UbiTennis', 'Essentially Sports - Tennis',
+    # WWE dedicated
+    'WrestleView', 'Fightful', 'Cageside Seats', 'PWTorch',
+    # FIGHTING dedicated
+    'Bad Left Hook',
+    # RACING dedicated
+    'Motorsport - MotoGP', 'Autosport - MotoGP', 'Roadracing World',
+    'Motorsport - NASCAR', 'Autosport - NASCAR', 'Motorsports Tribune',
+    'Jayski', 'Crash.net MotoGP', 'Crash.net NASCAR', 'BBC - F1',
+])
+
 
 def _infer_sport(title, summary, current_sub, primary_cat, url=""):
     text = (title + " " + summary).lower()
     url_lower = url.lower() if url else ""
-    
-    # 1. Determine if it is College Sports first
+
+    # 0a. DOMAIN TRUST — fastest path, always correct, no scoring needed
+    # If the article URL comes from a known sport-specific domain, return immediately.
+    if url_lower:
+        for domain_key, sport_result in _DOMAIN_SPORT_TRUST.items():
+            if domain_key in url_lower:
+                return sport_result
+
+    # 0. High School / Prep Early Exit — never promote prep sports
+    if _HIGH_SCHOOL_INDICATORS.search(title + " " + summary):
+        # Only promote if there's strong explicit pro/college URL evidence
+        if not any(x in url_lower for x in [
+            '/nba/', '/nfl/', '/mlb/', '/nhl/', '/college-football/', '/college-basketball/',
+            '/college-baseball/', '/softball/', '/ncaa'
+        ]):
+            return 'GEN', 'General'
+
+    # 1. Determine if it is College Sports first via URL
     is_college = False
+    url_sport = None
+    
     if url_lower:
         if any(x in url_lower for x in ['/college-football/', '/cfb/', '/college-basketball/', '/cbb/', '/softball/', '/college-baseball/', '/college-', '/ncaa']):
             is_college = True
         elif any(x in url_lower for x in ['/nba/', '/wnba/', '/nfl/', '/mlb/', '/nhl/', '/golf/', '/tennis/', '/wwe/', '/mma/', '/ufc/', '/boxing/', '/f1/', '/nascar/', '/motogp/']):
             is_college = False
+            
+    # 2. Extract explicit sport from URL path if present
+    if url_lower:
+        if any(x in url_lower for x in ['/college-football/', '/cfb/']):
+            url_sport = 'NFL'
+        elif any(x in url_lower for x in ['/college-basketball/', '/cbb/']):
+            url_sport = 'NBA'
+        elif '/softball/' in url_lower:
+            url_sport = 'Softball'
+        elif any(x in url_lower for x in ['/college-baseball/', '/baseball/', '/mlb/']) and ('/college-' in url_lower or '/ncaa' in url_lower):
+            url_sport = 'MLB'
+        elif '/nba/' in url_lower or '/wnba/' in url_lower or '/basketball/' in url_lower:
+            url_sport = 'NBA'
+        elif '/nfl/' in url_lower or '/football/' in url_lower:
+            url_sport = 'NFL'
+        elif '/mlb/' in url_lower or '/baseball/' in url_lower:
+            url_sport = 'MLB'
+        elif '/nhl/' in url_lower or '/hockey/' in url_lower:
+            url_sport = 'NHL'
+        elif any(x in url_lower for x in ['/soccer/', '/football/', '/transfer-rumours/']) and not any(x in url_lower for x in ['/nfl/', '/college-football/']):
+            url_sport = 'SOCCER'
+        elif '/golf/' in url_lower:
+            url_sport = 'GOLF'
+        elif '/tennis/' in url_lower:
+            url_sport = 'TENNIS'
+        elif '/wwe/' in url_lower or '/wrestling/' in url_lower:
+            url_sport = 'WWE'
+        elif any(x in url_lower for x in ['/mma/', '/ufc/', '/boxing/', '/fighting/']):
+            url_sport = 'FIGHTING'
+        elif any(x in url_lower for x in ['/f1/', '/formula-1/', '/nascar/', '/motogp/', '/racing/']):
+            url_sport = 'RACING'
+
+    # 3. Weighted Scoring Verification
+    inferred_sport = None
+    pro_signal = 0
+    college_signal = 0
+    
+    # If the URL gave a clear sport, we trust it
+    if url_sport:
+        inferred_sport = url_sport
+    else:
+        # Check text signals for sport matching
+        scores = {}
+        for sport, keywords in _SPORT_KEYWORDS.items():
+            score = 0
+            for k in keywords:
+                if re.search(r'\b' + re.escape(k) + r'\b', text):
+                    score += 2
+            scores[sport] = score
+            
+        # Softball specific check
+        softball_score = 0
+        for sk in _SOFTBALL_KEYWORDS:
+            if re.search(r'\b' + sk + r'\b', text):
+                softball_score += 2
+        scores['Softball'] = softball_score
+        
+        # Pro vs College signal weighting
+        # Nicknames matching
+        for league, teams in _PRO_TEAMS.items():
+            for t in teams:
+                if re.search(r'\b' + re.escape(t) + r'\b', text):
+                    pro_signal += 3
+                    if league in scores:
+                        scores[league] += 3
+                    
+        for t in _COLLEGE_TEAMS:
+            if re.search(r'\b' + re.escape(t) + r'\b', text):
+                college_signal += 3
+                
+        # General Pro/College keyword signals
+        pro_terms = ['pro', 'professional', 'major league', 'world series', 'spring training', 'free agent', 'trade rumor', 'rookie of the year']
+        college_terms = ['college', 'ncaa', 'd1', 'recruit', 'commit', 'national letter of intent', 'wcws', 'cws', 'varsity']
+        
+        for pt in pro_terms:
+            if re.search(r'\b' + re.escape(pt) + r'\b', text):
+                pro_signal += 2
+        for ct in college_terms:
+            if re.search(r'\b' + re.escape(ct) + r'\b', text):
+                college_signal += 2
+                
+        # Apply seasonal context multiplier:
+        # Peak sports (playoffs/championships) score 2x → win disambiguation
+        # Off-season sports score 0.4x → lose to in-season sports on close calls
+        # IMPORTANT: If college_signal strongly dominates pro_signal, suppress pro-team
+        # score boosts to prevent e.g. "Tigers" (Detroit MLB) beating LSU Tigers context.
+        _month = datetime.datetime.now().month
+        _active = _SEASON_ACTIVE.get(_month, frozenset())
+        _peak = _SEASON_PEAK.get(_month, frozenset())
+        _college_dominates = college_signal >= pro_signal * 2 and college_signal >= 6
+        for sport in list(scores.keys()):
+            if sport in _peak:
+                # Apply 2x peak boost ONLY if college doesn't clearly dominate
+                if not (_college_dominates and sport not in ('COLLEGE',)):
+                    scores[sport] = int(scores[sport] * 2.0)
+                else:
+                    scores[sport] = int(scores[sport] * 0.5)  # suppress pro boost
+            elif sport not in _active and sport not in ('Softball',):
+                scores[sport] = int(scores[sport] * 0.4)
+
+        # Find highest scoring sport
+        max_sport = None
+        max_score = 0
+        for s, sc in scores.items():
+            if sc > max_score:
+                max_score = sc
+                max_sport = s
+
+        # GEN feeds require a stronger signal threshold to prevent noise promotions
+        gen_feed = primary_cat.upper() not in ['NBA', 'NFL', 'MLB', 'NHL', 'SOCCER', 'RACING', 'TENNIS', 'GOLF', 'WWE', 'FIGHTING', 'COLLEGE']
+        min_score = 4 if gen_feed else 2
+
+        if max_sport and max_score >= min_score:
+            inferred_sport = max_sport
+            
+            # Resolve Pro vs College boundary
+            if primary_cat.upper() == 'COLLEGE':
+                if pro_signal > college_signal + 4: # Strong pro override
+                    is_college = False
+                else:
+                    is_college = True
+            elif primary_cat.upper() in ['NBA', 'NFL', 'MLB', 'NHL', 'SOCCER', 'RACING', 'TENNIS', 'GOLF', 'WWE', 'FIGHTING']:
+                if college_signal > pro_signal + 4: # Strong college override
+                    is_college = True
+                else:
+                    is_college = False
+            else:
+                # Generic feed (GEN, Yahoo Top, SBNation, etc.)
+                if inferred_sport in ['NFL', 'NBA', 'MLB', 'NHL', 'Softball', 'SOCCER']:
+                    if college_signal > pro_signal and college_signal >= 3:
+                        is_college = True
+                    elif pro_signal > college_signal and pro_signal >= 3:
+                        is_college = False
+                    else:
+                        # Weak/equal signals: do not promote team sports from GEN feed!
+                        inferred_sport = None
+                        is_college = False
+                else:
+                    # Individual/other sports: promote directly without team registry check
+                    is_college = False
         else:
+            inferred_sport = None
             if primary_cat.upper() == 'COLLEGE':
                 is_college = True
             else:
+                is_college = False
                 for ck in _COLLEGE_KEYWORDS:
                     if re.search(r'\b' + ck + r'\b', text):
                         is_college = True
                         break
-    else:
-        if primary_cat.upper() == 'COLLEGE':
-            is_college = True
-        else:
-            for ck in _COLLEGE_KEYWORDS:
-                if re.search(r'\b' + ck + r'\b', text):
-                    is_college = True
-                    break
+            # Even if score < threshold, record the highest-scoring sport for sub_category
+            # assignment when we do confirm it's college below
+            if max_sport and max_score >= 2:
+                inferred_sport = max_sport  # keep for sub-labeling only
 
-    # 2. Determine Sport category
-    inferred_sport = None
-    
-    # Check URL path for explicit sport indicators first
-    if url_lower:
-        if any(x in url_lower for x in ['/college-football/', '/cfb/']):
-            inferred_sport = 'NFL'
-        elif any(x in url_lower for x in ['/college-basketball/', '/cbb/']):
-            inferred_sport = 'NBA'
-        elif '/softball/' in url_lower:
-            inferred_sport = 'Softball'
-        elif any(x in url_lower for x in ['/college-baseball/', '/baseball/', '/mlb/']) and ('/college-' in url_lower or '/ncaa' in url_lower):
-            inferred_sport = 'MLB'
-        elif '/nba/' in url_lower or '/wnba/' in url_lower or '/basketball/' in url_lower:
-            inferred_sport = 'NBA'
-        elif '/nfl/' in url_lower or '/football/' in url_lower:
-            inferred_sport = 'NFL'
-        elif '/mlb/' in url_lower or '/baseball/' in url_lower:
-            inferred_sport = 'MLB'
-        elif '/nhl/' in url_lower or '/hockey/' in url_lower:
-            inferred_sport = 'NHL'
-        elif any(x in url_lower for x in ['/soccer/', '/football/', '/transfer-rumours/']) and not any(x in url_lower for x in ['/nfl/', '/college-football/']):
-            inferred_sport = 'SOCCER'
-        elif '/golf/' in url_lower:
-            inferred_sport = 'GOLF'
-        elif '/tennis/' in url_lower:
-            inferred_sport = 'TENNIS'
-        elif '/wwe/' in url_lower or '/wrestling/' in url_lower:
-            inferred_sport = 'WWE'
-        elif any(x in url_lower for x in ['/mma/', '/ufc/', '/boxing/', '/fighting/']):
-            inferred_sport = 'FIGHTING'
-        elif any(x in url_lower for x in ['/f1/', '/formula-1/', '/nascar/', '/motogp/', '/racing/']):
-            inferred_sport = 'RACING'
-
-    # Fallback to text keywords if URL path did not yield a specific sport
-    if not inferred_sport:
-        for sk in _SOFTBALL_KEYWORDS:
-            if re.search(r'\b' + sk + r'\b', text):
-                inferred_sport = 'Softball'
-                break
-                
-        if not inferred_sport:
-            for sport, keywords in _SPORT_KEYWORDS.items():
-                found = False
-                for k in keywords:
-                    if re.search(r'\b' + re.escape(k) + r'\b', text):
-                        inferred_sport = sport
-                        found = True
-                        break
-                if found:
-                    break
-
-    # 3. Resolve hierarchical routing
+    # 4. Resolve final hierarchical routing
     final_sub = current_sub if current_sub else 'General'
     
     if is_college:
+        # Verify college evidence
+        college_evidence = college_signal > 0 or primary_cat.upper() == 'COLLEGE' or any(x in url_lower for x in ['/college-', '/ncaa'])
+        if not college_evidence:
+            if inferred_sport and inferred_sport != 'Softball':
+                p_cat = inferred_sport
+                final_sub = 'General'
+                return p_cat, final_sub
+            else:
+                return 'GEN', 'General'
+
         sport_sub_map = {
             'NFL': 'Football',
             'NBA': 'Basketball',
@@ -250,12 +604,48 @@ def _infer_sport(title, summary, current_sub, primary_cat, url=""):
             'NHL': 'Hockey',
             'SOCCER': 'Soccer'
         }
-        sub_name = sport_sub_map.get(inferred_sport, inferred_sport)
-        if sub_name:
-            final_sub = sub_name
+        
+        # Text-validated sport detection for COLLEGE sub_category:
+        # Use direct keyword evidence to confirm sport before trusting inferred_sport
+        # ORDER MATTERS: more specific checks first; baseball before softball (pitcher is baseball)
+        _col_sport = None
+        if any(re.search(r'\b' + re.escape(k) + r'\b', text) for k in ['basketball', 'hoops', 'dunk', 'rebound', 'three-pointer', 'buzzer',
+                                    'free throw', 'layup', 'ncaa tournament', 'march madness',
+                                    'elite eight', 'sweet sixteen', 'final four', 'first four',
+                                    'ncaa bracket', 'cbb', 'point guard', 'slam dunk']):
+            _col_sport = 'Basketball'
+        elif any(re.search(r'\b' + re.escape(k) + r'\b', text) for k in ['softball', 'fastpitch', 'wcws', 'windmill']):
+            _col_sport = 'Softball'
+        elif any(re.search(r'\b' + re.escape(k) + r'\b', text) for k in ['baseball', 'pitcher', 'strikeout', 'bullpen', 'home run', 'homerun',
+                                     'cws', 'innings', 'inning', 'batter', 'bat around', 'rbi',
+                                     'no-hitter', 'double play', 'walk-off']):
+            _col_sport = 'Baseball'
+        elif any(re.search(r'\b' + re.escape(k) + r'\b', text) for k in ['football', 'quarterback', 'touchdown', 'gridiron', 'linebacker', 'recruit', 'commit', 'signing day']):
+            _col_sport = 'Football'
+        elif any(re.search(r'\b' + re.escape(k) + r'\b', text) for k in ['hockey', 'puck', 'goalie', 'stanley cup']):
+            _col_sport = 'Hockey'
+        elif any(re.search(r'\b' + re.escape(k) + r'\b', text) for k in ['soccer', 'goalkeeper', 'corner kick', 'penalty kick']):
+            _col_sport = 'Soccer'
+
+        if _col_sport:
+            final_sub = _col_sport
         else:
-            if current_sub and current_sub.lower() not in ['general', 'news', 'top', 'trending', 'analysis', 'opinion']:
-                final_sub = current_sub
+            # No sport detected from text — do NOT inherit feed's sub_category blindly.
+            # That's how baseball coaches end up in COLLEGE:Baseball.
+            # Only trust current_sub from narrowly-specific feeds with no text evidence.
+            _trusted_subs = {'Baseball', 'Softball', 'W-Basketball'}
+            if current_sub in _trusted_subs and primary_cat.upper() == 'COLLEGE':
+                # Sanity check: verify at least one sport word with word boundary (not substring)
+                _sport_word_map = {
+                    'Baseball': [r'\bbaseball\b', r'\bpitcher\b', r'\bbatter\b', r'\binning\b', r'\bbullpen\b', r'\bstrikeout\b'],
+                    'Softball': [r'\bsoftball\b', r'\bpitcher\b', r'\bwcws\b', r'\bfastpitch\b'],
+                    'W-Basketball': [r'\bbasketball\b', r'\bhoops\b', r'\bdribble\b'],
+                }
+                _confirm_words = _sport_word_map.get(current_sub, [])
+                if any(re.search(w, text) for w in _confirm_words):
+                    final_sub = current_sub
+                else:
+                    final_sub = 'General'
             else:
                 final_sub = 'General'
         return 'COLLEGE', final_sub
@@ -358,18 +748,36 @@ async def fetch_feeds():
                 before_count = len(all_articles)
                 all_articles = [a for a in all_articles if datetime.datetime.fromisoformat(a['published_at']) <= now_est]
                 purged = before_count - len(all_articles)
-                if purged > 0:
-                    print(f"[*] Self-healing: Purged {purged} articles with future timestamps.")
-                
-                # V30.6.26: Re-classify existing articles with updated classification logic
+                # V30.6.28: Re-classify + drop unclassifiable generic articles
+                reclassified = []
+                dropped_generic = 0
                 for a in all_articles:
                     feed_info = FEEDS.get(a.get('source'))
                     orig_p_cat = feed_info[1] if feed_info else a.get('primary_category')
                     orig_s_cat = feed_info[2] if feed_info else a.get('sub_category')
+                    # V30.6.29: Category-locked sources always trust feed declaration
+                    # Case-insensitive lock: normalize source name
+                    src_name = a.get('source')
+                    if src_name and src_name.lower() in {s.lower() for s in _CATEGORY_LOCKED_SOURCES} and feed_info:
+                        a['primary_category'] = feed_info[1]
+                        a['sub_category'] = feed_info[2]
+                        reclassified.append(a)
+                        continue
                     new_p_cat, new_s_cat = _infer_sport(a['title'], a['summary'], orig_s_cat, orig_p_cat, a.get('url', ''))
+                    # Drop: generic source + can't classify → not worth showing
+                    # Also drop COLLEGE:General from generic sources when no sport text evidence
+                    _is_unclassified = (new_p_cat == 'GEN') or (new_p_cat == 'COLLEGE' and new_s_cat == 'General')
+                    if _is_unclassified and a.get('source') in _GENERIC_SOURCES:
+                        dropped_generic += 1
+                        continue
                     a['primary_category'] = new_p_cat
                     a['sub_category'] = new_s_cat
+                    reclassified.append(a)
+                all_articles = reclassified
+                if dropped_generic > 0:
+                    print(f"[*] Dropped {dropped_generic} unclassifiable articles from generic sources.")
                 print(f"[*] Loaded {len(all_articles)} valid articles from persistent layer (re-classified).")
+
     except Exception as e:
         print(f"[!] Persistence error (Likely fresh build): {e}")
     
@@ -488,8 +896,17 @@ async def fetch_feeds():
 
                     impact_score = analyze_article_impact(title, summary, source)
                     
-                    # V30.6.26: Hierarchical Categorization
-                    article_primary_cat, article_sub_cat = _infer_sport(title, summary, sub_cat, primary_cat, link)
+                    # V30.6.29: Category-locked sources trust feed declaration, skip classification
+                    if source in _CATEGORY_LOCKED_SOURCES:
+                        article_primary_cat = primary_cat
+                        article_sub_cat = sub_cat
+                    else:
+                        # V30.6.28: Hierarchical Categorization + generic source drop
+                        article_primary_cat, article_sub_cat = _infer_sport(title, summary, sub_cat, primary_cat, link)
+                        # Drop: can't classify from generic feed → not important → don't list
+                        _is_unclassified = (article_primary_cat == 'GEN') or (article_primary_cat == 'COLLEGE' and article_sub_cat == 'General')
+                        if _is_unclassified and source in _GENERIC_SOURCES:
+                            continue
                     
                     # V30.6.15: Calculate Hot Score (Grace Period + Decay)
                     # A 90-rating news item stays at 90 for 4 hours, then decays to ~60 at hour 18.

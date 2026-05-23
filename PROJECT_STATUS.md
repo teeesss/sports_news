@@ -4,10 +4,19 @@
 **NEVER DO THE FOLLOWING:** Never Remove `database/sports_news.js`. All fixes must be done via script modifications, not file deletion!
 
 ## Recent Milestones
+- **2026-05-23 (V30.6.29)**: College Sport Classification Hardening & Domain Lock.
+  - Implemented case-insensitive lock normalization to protect source category mappings during persistence reloads.
+  - Corrected pro vs college boundary indentation bug to ensure all feeds are correctly evaluated for college promotion and pro overrides.
+  - Migrated college sub-category validation from substring searches to strict regex matching with word boundaries and keyword escaping, resolving substring collisions (e.g. "beginning" matching "inning" for Baseball).
+  - Deployed updates, expanding test coverage to 37/37 passing regression tests.
+- **2026-05-23 (V30.6.28)**: Seasonal Intelligence & Generic Feed Drops.
+  - Implemented `_SEASON_ACTIVE` and `_SEASON_PEAK` calendar structures (May: NBA/NHL/MLB playoffs/CWS/WCWS get 2x score boosts, off-season sports get 0.4x penalty).
+  - Implemented `college_dominates` override guard to suppress pro-team peak boosts when college signals strongly dominate (fixes Tigers/Detroit MLB vs LSU Tigers collision).
+  - Added generic sources exclusion to drop unclassifiable low-value generic feed noise (GEN or COLLEGE:General from generic sources like Yahoo Top).
+  - Deployed verified release payload to bmwseals.com/sports-test staging.
 - **2026-05-23 (V30.6.27)**: URL path-based categorization overrides.
   - Implemented URL-based routing in the classification engine to override feed-level configurations (e.g. professional articles cross-promoted in college feeds get correctly mapped based on their URL segments rather than feed identity).
   - Integrated in-place re-classification loop for existing persistent layer articles to ensure historical database records self-heal when classification rules are updated.
-  - Added new automated tests to verify URL and feed overrides. 13/13 tests passing.
 - **2026-05-23 (V30.6.26)**: Premium Feeds Ingestion & UI Styling Upgrades.
   - Integrated 10 new premium free RSS feeds from CBS Sports, BBC Sport, and NBC Sports.
   - Added "RSS Ingestion Priority" standard rule to knowledge base and developer rules.

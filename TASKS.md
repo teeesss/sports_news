@@ -64,5 +64,36 @@
 
 
 ## Monitoring
-- [ ] Monitor long-term stability of stealth fetches
-- [ ] Track mobile engagement with 2-row nav
+- [x] Monitor long-term stability of stealth fetches ✅
+- [x] Track mobile engagement with 2-row nav ✅
+
+## Classification Hardening (V30.6.27)
+- [x] Expanded `_SPORT_KEYWORDS` with 3-5x more sport-specific terms (bullpen/ERA/RBI for MLB, sack/blitz/QB for NFL, power play/goalie for NHL, etc.) ✅
+- [x] Added `_HIGH_SCHOOL_INDICATORS` regex — prep/varsity/state championship articles now early-exit to GEN ✅
+- [x] Raised GEN feed minimum confidence threshold from 2 → 4 to prevent noise promotions ✅
+- [x] Expanded `_COLLEGE_KEYWORDS` with conference names (Big East, Mountain West, Sun Belt, CWS, super regional) ✅
+- [x] Fixed NHL team name collisions ("devils"→"new jersey devils", "rangers"→"new york rangers", etc.) ✅
+- [x] Added text-validated sport detector for COLLEGE sub_category routing — prevents "overtime" routing basketball articles to Hockey ✅
+- [x] Added March Madness bracket keywords (elite eight, sweet sixteen, final four) for basketball sub_category ✅
+- [x] Expanded test suite from 8 → 30 tests covering all 10 sport types + HS exclusion + GEN threshold + college disambiguation ✅
+- [x] All 30 tests passing ✅
+
+## V30.6.28 - Seasonal Intelligence + Generic Source Drop (2026-05-23)
+- [x] Added _SEASON_ACTIVE calendar: sports active by month ✅
+- [x] Added _SEASON_PEAK calendar: peak/playoff sports get 2x score boost (NBA/NHL/MLB/COLLEGE/Softball in May) ✅
+- [x] Added _GENERIC_SOURCES: Yahoo Top, SBNation, FanSided, Deadspin ✅
+- [x] Off-season sports get 0.4x score penalty (NFL in May won't win disambiguation) ✅
+- [x] college_dominates guard: when college_signal >= pro_signal*2, suppresses pro-team peak boost (fixes tigers=Detroit vs LSU) ✅
+- [x] COLLEGE sub fallback: no longer inherits current_sub blindly; requires word-boundary sport keyword confirmation ✅
+- [x] HS school name pattern: catches [School] High [football|coach|etc] constructs ✅
+- [x] Drop rule: GEN or COLLEGE:General from generic sources -> skip, not shown ✅
+- [x] Regression tests added: all 3 user-reported failures now covered (Orgeron, Stillwater, UCF/UCLA) ✅
+- [x] 37/37 tests pass ✅
+- [x] Deployed to bmwseals.com/sports-test ✅
+
+## V30.6.29 - College Sport Classification Hardening & Domain Lock (2026-05-23)
+- [x] Case-Insensitive Lock: Normalized feed-source lookup to protect locked feeds case-insensitively during persistence reloads. ✅
+- [x] Indentation Fix: Corrected nesting of pro vs college boundary scoring so it checks all feeds (including COLLEGE and specific pro leagues) rather than only GEN. ✅
+- [x] Regex Word-Boundary Protection: Migrated college sport sub-category checks to regex search with word boundaries and `re.escape()` to avoid substring collisions (e.g. "beginning" matching "inning" for Baseball). ✅
+- [x] Regression Testing: Verified 37/37 tests passing cleanly. ✅
+- [x] Deployed updates to staging server and verified all systems. ✅
