@@ -4,6 +4,10 @@
 **NEVER DO THE FOLLOWING:** Never Remove `database/sports_news.js`. All fixes must be done via script modifications, not file deletion!
 
 ## Recent Milestones
+- **2026-05-23 (V30.6.27)**: URL path-based categorization overrides.
+  - Implemented URL-based routing in the classification engine to override feed-level configurations (e.g. professional articles cross-promoted in college feeds get correctly mapped based on their URL segments rather than feed identity).
+  - Integrated in-place re-classification loop for existing persistent layer articles to ensure historical database records self-heal when classification rules are updated.
+  - Added new automated tests to verify URL and feed overrides. 13/13 tests passing.
 - **2026-05-23 (V30.6.26)**: Premium Feeds Ingestion & UI Styling Upgrades.
   - Integrated 10 new premium free RSS feeds from CBS Sports, BBC Sport, and NBC Sports.
   - Added "RSS Ingestion Priority" standard rule to knowledge base and developer rules.
