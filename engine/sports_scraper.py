@@ -158,37 +158,85 @@ _SPORT_KEYWORDS = {
 
 _SOFTBALL_KEYWORDS = [r'softball', r'fastpitch', r'wcws', r'd1softball']
 
-def _infer_sport(title, summary, current_sub, primary_cat):
+def _infer_sport(title, summary, current_sub, primary_cat, url=""):
     text = (title + " " + summary).lower()
+    url_lower = url.lower() if url else ""
     
     # 1. Determine if it is College Sports first
     is_college = False
-    if primary_cat.upper() == 'COLLEGE':
-        is_college = True
-    else:
-        for ck in _COLLEGE_KEYWORDS:
-            if re.search(r'\b' + ck + r'\b', text):
+    if url_lower:
+        if any(x in url_lower for x in ['/college-football/', '/cfb/', '/college-basketball/', '/cbb/', '/softball/', '/college-baseball/', '/college-', '/ncaa']):
+            is_college = True
+        elif any(x in url_lower for x in ['/nba/', '/wnba/', '/nfl/', '/mlb/', '/nhl/', '/golf/', '/tennis/', '/wwe/', '/mma/', '/ufc/', '/boxing/', '/f1/', '/nascar/', '/motogp/']):
+            is_college = False
+        else:
+            if primary_cat.upper() == 'COLLEGE':
                 is_college = True
-                break
+            else:
+                for ck in _COLLEGE_KEYWORDS:
+                    if re.search(r'\b' + ck + r'\b', text):
+                        is_college = True
+                        break
+    else:
+        if primary_cat.upper() == 'COLLEGE':
+            is_college = True
+        else:
+            for ck in _COLLEGE_KEYWORDS:
+                if re.search(r'\b' + ck + r'\b', text):
+                    is_college = True
+                    break
 
     # 2. Determine Sport category
     inferred_sport = None
     
-    for sk in _SOFTBALL_KEYWORDS:
-        if re.search(r'\b' + sk + r'\b', text):
+    # Check URL path for explicit sport indicators first
+    if url_lower:
+        if any(x in url_lower for x in ['/college-football/', '/cfb/']):
+            inferred_sport = 'NFL'
+        elif any(x in url_lower for x in ['/college-basketball/', '/cbb/']):
+            inferred_sport = 'NBA'
+        elif '/softball/' in url_lower:
             inferred_sport = 'Softball'
-            break
-            
+        elif any(x in url_lower for x in ['/college-baseball/', '/baseball/', '/mlb/']) and ('/college-' in url_lower or '/ncaa' in url_lower):
+            inferred_sport = 'MLB'
+        elif '/nba/' in url_lower or '/wnba/' in url_lower or '/basketball/' in url_lower:
+            inferred_sport = 'NBA'
+        elif '/nfl/' in url_lower or '/football/' in url_lower:
+            inferred_sport = 'NFL'
+        elif '/mlb/' in url_lower or '/baseball/' in url_lower:
+            inferred_sport = 'MLB'
+        elif '/nhl/' in url_lower or '/hockey/' in url_lower:
+            inferred_sport = 'NHL'
+        elif any(x in url_lower for x in ['/soccer/', '/football/', '/transfer-rumours/']) and not any(x in url_lower for x in ['/nfl/', '/college-football/']):
+            inferred_sport = 'SOCCER'
+        elif '/golf/' in url_lower:
+            inferred_sport = 'GOLF'
+        elif '/tennis/' in url_lower:
+            inferred_sport = 'TENNIS'
+        elif '/wwe/' in url_lower or '/wrestling/' in url_lower:
+            inferred_sport = 'WWE'
+        elif any(x in url_lower for x in ['/mma/', '/ufc/', '/boxing/', '/fighting/']):
+            inferred_sport = 'FIGHTING'
+        elif any(x in url_lower for x in ['/f1/', '/formula-1/', '/nascar/', '/motogp/', '/racing/']):
+            inferred_sport = 'RACING'
+
+    # Fallback to text keywords if URL path did not yield a specific sport
     if not inferred_sport:
-        for sport, keywords in _SPORT_KEYWORDS.items():
-            found = False
-            for k in keywords:
-                if re.search(r'\b' + re.escape(k) + r'\b', text):
-                    inferred_sport = sport
-                    found = True
-                    break
-            if found:
+        for sk in _SOFTBALL_KEYWORDS:
+            if re.search(r'\b' + sk + r'\b', text):
+                inferred_sport = 'Softball'
                 break
+                
+        if not inferred_sport:
+            for sport, keywords in _SPORT_KEYWORDS.items():
+                found = False
+                for k in keywords:
+                    if re.search(r'\b' + re.escape(k) + r'\b', text):
+                        inferred_sport = sport
+                        found = True
+                        break
+                if found:
+                    break
 
     # 3. Resolve hierarchical routing
     final_sub = current_sub if current_sub else 'General'
@@ -313,7 +361,15 @@ async def fetch_feeds():
                 if purged > 0:
                     print(f"[*] Self-healing: Purged {purged} articles with future timestamps.")
                 
-                print(f"[*] Loaded {len(all_articles)} valid articles from persistent layer.")
+                # V30.6.26: Re-classify existing articles with updated classification logic
+                for a in all_articles:
+                    feed_info = FEEDS.get(a.get('source'))
+                    orig_p_cat = feed_info[1] if feed_info else a.get('primary_category')
+                    orig_s_cat = feed_info[2] if feed_info else a.get('sub_category')
+                    new_p_cat, new_s_cat = _infer_sport(a['title'], a['summary'], orig_s_cat, orig_p_cat, a.get('url', ''))
+                    a['primary_category'] = new_p_cat
+                    a['sub_category'] = new_s_cat
+                print(f"[*] Loaded {len(all_articles)} valid articles from persistent layer (re-classified).")
     except Exception as e:
         print(f"[!] Persistence error (Likely fresh build): {e}")
     
@@ -433,7 +489,7 @@ async def fetch_feeds():
                     impact_score = analyze_article_impact(title, summary, source)
                     
                     # V30.6.26: Hierarchical Categorization
-                    article_primary_cat, article_sub_cat = _infer_sport(title, summary, sub_cat, primary_cat)
+                    article_primary_cat, article_sub_cat = _infer_sport(title, summary, sub_cat, primary_cat, link)
                     
                     # V30.6.15: Calculate Hot Score (Grace Period + Decay)
                     # A 90-rating news item stays at 90 for 4 hours, then decays to ~60 at hour 18.

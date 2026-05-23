@@ -39,3 +39,25 @@ def test_hierarchical_categorization_pro_f1():
     p_cat, s_cat = _infer_sport(title, summary, "General", "GEN")
     assert p_cat == "RACING", f"Expected primary category to be RACING, got {p_cat}"
     assert s_cat == "F1", f"Expected sub-category to be F1, got {s_cat}"
+
+def test_url_based_categorization_overrides_text():
+    """Verify that URL path /nba/ overrides text college/MLB keywords to prevent misclassification"""
+    title = "Shai Gilgeous-Alexander delivers MVP response; Ed Orgeron rejoins LSU staff"
+    summary = "Plus, what's with all the shirtless fans showing up in MLB stands?"
+    url = "https://www.cbssports.com/nba/news/shai-gilgeous-alexander-delivers-mvp-response-ed-orgeron-rejoins-lsu-staff/"
+    
+    p_cat, s_cat = _infer_sport(title, summary, "General", "GEN", url=url)
+    assert p_cat == "NBA", f"Expected primary category to be NBA based on URL, got {p_cat}"
+    assert s_cat == "General", f"Expected sub-category to be General, got {s_cat}"
+
+def test_url_based_categorization_overrides_feed():
+    """Verify that URL path /nba/ overrides COLLEGE feed primary category setup"""
+    title = "Shai Gilgeous-Alexander delivers MVP response; Ed Orgeron rejoins LSU staff"
+    summary = "Plus, what's with all the shirtless fans showing up in MLB stands?"
+    url = "https://www.cbssports.com/nba/news/shai-gilgeous-alexander-delivers-mvp-response-ed-orgeron-rejoins-lsu-staff/"
+    
+    p_cat, s_cat = _infer_sport(title, summary, "General", "COLLEGE", url=url)
+    assert p_cat == "NBA", f"Expected primary category to be NBA despite COLLEGE feed, got {p_cat}"
+    assert s_cat == "General", f"Expected sub-category to be General, got {s_cat}"
+
+
