@@ -21971,3 +21971,11 @@ Ghost Browsing Complete.
 Total [ERRORS] = 0
 Total [ERRORS] = 0
 Sat May 23 09:13:13 AM CDT 2026: Sports Intelligence Synopsis Dispatched
+[*] VADER imports...
+[*] NLTK imported.
+[*] Checking NLTK lexicon...
+[*] Lexicon found.
+[!] Intelligence Cache is fresh (16.4m old). Skipping sync to protect endpoints. Use --force to override.
+Total [ERRORS] = 0
+Total [ERRORS] = 0
+Sat May 23 11:18:54 AM CDT 2026: Sports Intelligence Synopsis Dispatched

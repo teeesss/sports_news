@@ -180,17 +180,17 @@ class StealthNavigator:
     async def ghost_browse(self, page, target_url):
         """Performs human-like browsing behavior before data extraction."""
         print(f"Ghost Browsing: {target_url}")
-
+        response = None
         try:
             # randomized wait before navigation
             await asyncio.sleep(random.uniform(1.5, 4.5))
-            await page.goto(target_url, wait_until="domcontentloaded", timeout=60000)
+            response = await page.goto(target_url, wait_until="domcontentloaded", timeout=60000)
             
             # Post-load 'absorption' time
             await asyncio.sleep(random.uniform(4.0, 8.5)) 
         except Exception as e:
             print(f"  [!] Ghost Browsing Warning: {e}")
-            return
+            return None
 
         # 1. Randomized Multi-Phase Scrolling (Institutional Stealth)
         scroll_phases = random.randint(2, 5)
@@ -231,6 +231,7 @@ class StealthNavigator:
         # Final 'scan' pause before extraction
         await asyncio.sleep(random.uniform(2.0, 4.0))
         print("Ghost Browsing Complete.")
+        return response
 
     async def get_session_state(self, url, state_path=None):
         """Heats up a session and returns cookies/crumb."""

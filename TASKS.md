@@ -57,7 +57,11 @@
 - [x] Integrated 10 premium free RSS feeds for CBS, BBC, and NBC Sports. ✅
 - [x] Aligned client hints dynamically with browser user agent version to prevent stealth degradation. ✅
 - [x] Upgraded portal styling to high-fidelity Glassmorphism visual theme with custom rail-colored neon glow shadows. ✅
+- [x] Implemented source-level slide-down filter panel `[SOURCES ▾]` in `web/index.html` to filter articles by ingestion source (e.g. ESPN, CBS, BBC, D1Baseball, D1Softball, Swish Appeal, Yahoo, etc.). ✅
+- [x] Resolved "GEN" misclassification by implementing a two-pass hierarchical classification engine in `engine/sports_scraper.py` to correctly map sports (Football, Baseball, Basketball, Softball, Soccer, Hockey) and College tags, defaulting to General/GEN only when unresolvable. ✅
+- [x] Increased COLLEGE article limits to 150 (and global limit to 600) to prevent college baseball and softball articles from being pruned by NCAAF/NCAAB articles. ✅
 - [x] Deployed and verified whole release on `bmwseals.com/sports-test` staging endpoint. ✅
+
 
 ## Monitoring
 - [ ] Monitor long-term stability of stealth fetches

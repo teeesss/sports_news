@@ -125,6 +125,7 @@ FEEDS = {
     'Yahoo - NCAAB': ('https://sports.yahoo.com/college-basketball/rss/', 'COLLEGE', 'Basketball'),
     'D1Baseball': ('https://d1baseball.com/feed/', 'COLLEGE', 'Baseball'),
     'D1Softball': ('https://d1softball.com/feed/', 'COLLEGE', 'Softball'),
+    'Extra Inning Softball': ('https://extrainningsoftball.com/feed/', 'COLLEGE', 'Softball'),
     'Swish Appeal': ('https://www.swishappeal.com/rss/current.xml', 'COLLEGE', 'W-Basketball'),
     'CBS - NCAAF': ('https://www.cbssports.com/rss/headlines/college-football/', 'COLLEGE', 'Football'),
     'CBS - NCAAB': ('https://www.cbssports.com/rss/headlines/college-basketball/', 'COLLEGE', 'Basketball'),
@@ -136,43 +137,121 @@ FEEDS = {
     'Deadspin': ('https://deadspin.com/rss', 'GEN', 'News'),
 }
 
+_COLLEGE_KEYWORDS = [
+    r'college', r'ncaa', r'recruit', r'commit', r'cfb', r'cbb', r'wcws', r'ncaa\.com', 
+    r'varsity', r'd1', r'sec network', r'big ten', r'acc', r'sec', r'pac-12', r'big 12',
+    r'softball', r'baseball'
+]
+
 _SPORT_KEYWORDS = {
-    'NBA': [r'nba', r'lebron', r'lakers', r'warriors', r'celtics', r'basketball', r'knicks', r'76ers', r'hoops'],
-    'NFL': [r'nfl', r'mahomes', r'super bowl', r'touchdown', r'cowboys', r'quarterback', r'gridiron'],
-    'MLB': [r'mlb', r'ohtani', r'yankees', r'baseball', r'homerun', r'statcast', r'pitcher', r'ballpark'],
+    'NBA': [r'nba', r'lebron', r'lakers', r'warriors', r'celtics', r'basketball', r'knicks', r'76ers', r'hoops', r'dunk', r'wnba'],
+    'NFL': [r'nfl', r'mahomes', r'super bowl', r'touchdown', r'cowboys', r'quarterback', r'gridiron', r'football', r'interception', r'touchdowns'],
+    'MLB': [r'mlb', r'ohtani', r'yankees', r'baseball', r'homerun', r'statcast', r'pitcher', r'ballpark', r'strikeout', r'innings', r'homeruns'],
     'NHL': [r'nhl', r'mcdavid', r'hockey', r'puck', r'stanley cup', r'slapshot', r'skating'],
-    'SOCCER': [r'soccer', r'fifa', r'messi', r'ronaldo', r'premier league', r'champions league', r'fwa', r'united', r'transfer', r'la liga', r'bundesliga'],
-    'RACING': [r'f1', r'nascar', r'motogp', r'verstappen', r'lewis hamilton', r'indycar', r'racing', r'paddock', r'grand prix', r'mclaren'],
+    'SOCCER': [r'soccer', r'fifa', r'messi', r'ronaldo', r'premier league', r'champions league', r'fwa', r'united', r'transfer', r'la liga', r'bundesliga', r'football club', r'la-liga'],
+    'RACING': [r'f1', r'formula 1', r'formulaone', r'nascar', r'motogp', r'verstappen', r'lewis hamilton', r'indycar', r'racing', r'paddock', r'grand prix', r'mclaren'],
     'TENNIS': [r'tennis', r'djokovic', r'federer', r'nadal', r'wimbledon', r'atp', r'wta', r'grand slam'],
     'GOLF': [r'golf', r'tiger woods', r'masters', r'pga', r'lpga', r'mcilroy', r'fairway'],
     'WWE': [r'wwe', r'wrestlemania', r'wrestling', r'smackdown', r'raw', r'tko', r'royal rumble'],
     'FIGHTING': [r'mma', r'ufc', r'boxing', r'mcgregor', r'knockout', r'heavyweight', r'octagon'],
 }
 
+_SOFTBALL_KEYWORDS = [r'softball', r'fastpitch', r'wcws', r'd1softball']
+
 def _infer_sport(title, summary, current_sub, primary_cat):
-    # If sub is already specific (not General/News/Top), don't override
-    if current_sub and current_sub.lower() not in ['general', 'news', 'top', 'trending', 'analysis', 'opinion']:
-        return current_sub
-    
-    # If primary_cat is already a specific sport, don't allow it to be overriden by a different sport inference
-    # This prevents "NHL : NBA" issues.
-    known_sports = ['NBA', 'NFL', 'MLB', 'NHL', 'SOCCER', 'RACING', 'TENNIS', 'GOLF', 'WWE', 'FIGHTING']
-    
     text = (title + " " + summary).lower()
     
-    # Priority 1: Check if the text matches the primary_cat itself (to clear "General" to specific)
-    if primary_cat in known_sports:
-        # If it's already a sport, we don't want to add a DIFFERENT sport as sub-label
-        return current_sub
+    # 1. Determine if it is College Sports first
+    is_college = False
+    if primary_cat.upper() == 'COLLEGE':
+        is_college = True
+    else:
+        for ck in _COLLEGE_KEYWORDS:
+            if re.search(r'\b' + ck + r'\b', text):
+                is_college = True
+                break
 
-    # Priority 2: Generic/College feeds - try to infer the sport with word boundaries
-    for sport, keywords in _SPORT_KEYWORDS.items():
-        for k in keywords:
-            # Use regex for word boundaries to avoid 'raw' in 'wrapped' or 'mcl' in 'mclaren'
-            if re.search(r'\b' + re.escape(k) + r'\b', text):
-                return sport
+    # 2. Determine Sport category
+    inferred_sport = None
+    
+    for sk in _SOFTBALL_KEYWORDS:
+        if re.search(r'\b' + sk + r'\b', text):
+            inferred_sport = 'Softball'
+            break
             
-    return current_sub
+    if not inferred_sport:
+        for sport, keywords in _SPORT_KEYWORDS.items():
+            found = False
+            for k in keywords:
+                if re.search(r'\b' + re.escape(k) + r'\b', text):
+                    inferred_sport = sport
+                    found = True
+                    break
+            if found:
+                break
+
+    # 3. Resolve hierarchical routing
+    final_sub = current_sub if current_sub else 'General'
+    
+    if is_college:
+        sport_sub_map = {
+            'NFL': 'Football',
+            'NBA': 'Basketball',
+            'MLB': 'Baseball',
+            'Softball': 'Softball',
+            'NHL': 'Hockey',
+            'SOCCER': 'Soccer'
+        }
+        sub_name = sport_sub_map.get(inferred_sport, inferred_sport)
+        if sub_name:
+            final_sub = sub_name
+        else:
+            if current_sub and current_sub.lower() not in ['general', 'news', 'top', 'trending', 'analysis', 'opinion']:
+                final_sub = current_sub
+            else:
+                final_sub = 'General'
+        return 'COLLEGE', final_sub
+    
+    else:
+        if inferred_sport:
+            if inferred_sport == 'Softball':
+                return 'COLLEGE', 'Softball'
+            
+            if current_sub and current_sub.lower() not in ['general', 'news', 'top', 'trending', 'analysis', 'opinion']:
+                final_sub = current_sub
+            else:
+                if inferred_sport == 'RACING':
+                    if any(k in text for k in ['f1', 'formula 1', 'formulaone', 'verstappen', 'hamilton', 'mclaren', 'grand prix', 'paddock']):
+                        final_sub = 'F1'
+                    elif any(k in text for k in ['nascar', 'jayski', 'cup series', 'cup race']):
+                        final_sub = 'NASCAR'
+                    elif any(k in text for k in ['motogp', 'moto-gp', 'gp', 'ducati']):
+                        final_sub = 'MOTOGP'
+                    else:
+                        final_sub = 'General'
+                elif inferred_sport == 'TENNIS':
+                    if any(k in text for k in ['wta', 'women', 'serena', 'swiatek', 'gauff', 'sabalenka']):
+                        final_sub = 'WTA'
+                    elif any(k in text for k in ['atp', 'men', 'djokovic', 'sinner', 'alcaraz', 'medvedev', 'federer', 'nadal']):
+                        final_sub = 'ATP'
+                    else:
+                        final_sub = 'General'
+                elif inferred_sport == 'FIGHTING':
+                    if any(k in text for k in ['mma', 'ufc', 'octagon', 'mcgregor', 'jones', 'pereira', 'white']):
+                        final_sub = 'MMA'
+                    elif any(k in text for k in ['boxing', 'boxer', 'canelo', 'fury', 'usyk', 'ring', 'knockout', 'ko']):
+                        final_sub = 'Boxing'
+                    else:
+                        final_sub = 'General'
+                else:
+                    final_sub = 'General'
+            return inferred_sport, final_sub
+        else:
+            p_cat = 'GEN' if primary_cat == 'GEN' else primary_cat
+            known_sports = ['NBA', 'NFL', 'MLB', 'NHL', 'SOCCER', 'RACING', 'TENNIS', 'GOLF', 'WWE', 'FIGHTING']
+            if primary_cat in known_sports:
+                p_cat = primary_cat
+            return p_cat, final_sub
 
 _JUNK_PATTERNS = re.compile(
     r"(cookies|privacy policy|advertising|subscription|sign up|newsletter|copyright|terms of service|all rights reserved)",
@@ -282,12 +361,17 @@ async def fetch_feeds():
             try:
                 page = await nav.context.new_page()
                 # Use ghost_browse for human-like behavior on every 5th fetch
+                response = None
                 if i % 5 == 0:
-                    await nav.ghost_browse(page, url)
+                    response = await nav.ghost_browse(page, url)
                 else:
-                    await page.goto(url, wait_until="domcontentloaded", timeout=45000)
+                    response = await page.goto(url, wait_until="domcontentloaded", timeout=45000)
                 
-                content = await page.content()
+                # Retrieve raw XML source text rather than rendered DOM HTML
+                if response:
+                    content = await response.text()
+                else:
+                    content = await page.content()
                 await page.close()
                 
                 # V30.6.22: Advanced XML Unwrapping for browser-rendered feeds
@@ -348,15 +432,8 @@ async def fetch_feeds():
 
                     impact_score = analyze_article_impact(title, summary, source)
                     
-                    # V30.6.22: Sport Inference for Labels (Fixed for cross-sport drift)
-                    article_sub_cat = _infer_sport(title, summary, sub_cat, primary_cat)
-                    
-                    # V30.6.23: If GEN feed infers a specific sport, promote it to primary
-                    article_primary_cat = primary_cat
-                    known_sports_list = ['NBA', 'NFL', 'MLB', 'NHL', 'SOCCER', 'RACING', 'TENNIS', 'GOLF', 'WWE', 'FIGHTING']
-                    if primary_cat == 'GEN' and article_sub_cat in known_sports_list:
-                        article_primary_cat = article_sub_cat
-                        article_sub_cat = 'General'
+                    # V30.6.26: Hierarchical Categorization
+                    article_primary_cat, article_sub_cat = _infer_sport(title, summary, sub_cat, primary_cat)
                     
                     # V30.6.15: Calculate Hot Score (Grace Period + Decay)
                     # A 90-rating news item stays at 90 for 4 hours, then decays to ~60 at hour 18.
@@ -400,10 +477,10 @@ async def fetch_feeds():
     cat_counts = {}
     cat_limits = {
         'GEN': 75,
-        'COLLEGE': 75
+        'COLLEGE': 150
     }
     default_cat_limit = 50
-    global_limit = 500
+    global_limit = 600
     
     for a in all_articles:
         t_key = a['title'].lower().strip()

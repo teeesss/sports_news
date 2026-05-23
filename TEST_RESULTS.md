@@ -15,12 +15,11 @@
   - `UI Verification`: PASS (Header date label and "1 MINS AGO" revert verified).
   - Status: PASS.
 
-- **2026-05-23 11:58**:
-  - `tests/test_new_feeds.py`: PASS (CBS, BBC, and NBC Sports RSS reachability and parsing verified).
-  - `tests/test_registry_contains_new_feeds.py`: PASS (Feeds added to primary scraper configuration registry).
-  - `tests/test_stealth_hints.py`: PASS (Dynamic Chrome version client-hints sync with User-Agent verified).
-  - `tests/test_ui_styles.py`: PASS (Glassmorphism backdrop filters and shadow transitions validated).
-  - `Full Suite`: PASS (11/11 tests pass successfully).
+- **2026-05-23 11:38**:
+  - `tests/test_categorization.py`: PASS (Hierarchical categorization for COLLEGE Football/Softball, pro NBA, and F1 verified)
+  - `tests/test_new_feeds.py`: PASS (CBS, BBC, and NBC Sports RSS reachability verified)
+  - `tests/test_registry_contains_new_feeds.py`: PASS (Registry integration verified)
+  - `tests/test_stealth_hints.py`: PASS (Client-hints dynamic sync with rotated Chrome version strings verified)
+  - `tests/test_ui_styles.py`: PASS (Glassmorphism backdrop-filters and cyber rail shadows verified)
+  - `Full Suite`: PASS (11/11 tests pass successfully)
   - Status: PASS.
-
-

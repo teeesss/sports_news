@@ -9,6 +9,8 @@
   - Added "RSS Ingestion Priority" standard rule to knowledge base and developer rules.
   - Aligned Playwright stealth `Sec-CH-UA` client-hints dynamically with rotated Chrome version strings to avoid hardware-fingerprint mismatch flags.
   - Upgraded frontend to modern glassmorphism (translucent cards, frosted background blur, custom color-matched neon glow shadows).
+  - Implemented dynamic source-level slide-down filter panel (`[SOURCES ▾]`) in `web/index.html` allowing filtering by specific ingestion network (ESPN, CBS, BBC, D1Baseball, etc.).
+  - Resolved generic "GEN" label mismatch using a hierarchical two-pass parser in `engine/sports_scraper.py` (checks for College domain vs. sport-specific rules first, falling back to General only if unresolvable).
   - Deployed baseline, verified 11/11 tests pass, and pushed updates to staging endpoint `bmwseals.com/sports-test`.
 - **2026-05-08 (V30.6.22)**: UI/UX Hardening & "Cyber-Dossier" Rollout.
   - Standardized on 'Outfit' geometric typography.
