@@ -4,6 +4,11 @@
 **NEVER DO THE FOLLOWING:** Never Remove `database/sports_news.js`. All fixes must be done via script modifications, not file deletion!
 
 ## Recent Milestones
+- **2026-05-23 (V30.6.30)**: Production Deployment & Documentation Alignment.
+  - Promoted V30.6.29 stable build to live production endpoint (`bmwseals.com/sports`).
+  - Switched active environment configurations (`WEB_ROOT_URL`, `SFTP_PATH`) to production pipelines.
+  - Validated full build assembly, database integrity self-healing, and secure remote deployment.
+  - Verified 44/44 regression and integration tests passing cleanly.
 - **2026-05-23 (V30.6.29)**: College Sport Classification Hardening & Domain Lock.
   - Implemented case-insensitive lock normalization to protect source category mappings during persistence reloads.
   - Corrected pro vs college boundary indentation bug to ensure all feeds are correctly evaluated for college promotion and pro overrides.

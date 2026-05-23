@@ -97,3 +97,10 @@
 - [x] Regex Word-Boundary Protection: Migrated college sport sub-category checks to regex search with word boundaries and `re.escape()` to avoid substring collisions (e.g. "beginning" matching "inning" for Baseball). ✅
 - [x] Regression Testing: Verified 37/37 tests passing cleanly. ✅
 - [x] Deployed updates to staging server and verified all systems. ✅
+
+## V30.6.30 - Production Deployment & Documentation Alignment (2026-05-23)
+- [x] Promoted V30.6.29 assets from staging to live production site (`bmwseals.com/sports`). ✅
+- [x] Standardized `.env` credentials for active production pipeline target. ✅
+- [x] Verified full production bundle generation (`build_dist.py`) and secure SFTP deployment (`remote_sync.py`). ✅
+- [x] Verified core test suite (44/44 green) against target platform. ✅
+- [x] Updated all project-wide architectural, operational, and lifecycle documentation. ✅

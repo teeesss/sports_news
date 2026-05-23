@@ -32,3 +32,8 @@
   - `tests/test_categorization.py`: PASS (37/37 — All tests passing successfully)
   - Coverage: Ed Orgeron (D1Baseball feed no sport evidence falls back to COLLEGE:General), Stillwater High (HS construct excluded), UCF/UCLA Softball Super Regional, seasonal active/peak filters.
   - Status: **37/37 PASS**.
+
+- **2026-05-23 V30.6.30**:
+  - `Core test suite`: PASS (44/44 — All tests passing successfully)
+  - Coverage: Core sport categorization, seasonal active/peak filters, stealth client-hints, glassmorphism UI styles, registry verification, scraper integration.
+  - Status: **44/44 PASS**.
