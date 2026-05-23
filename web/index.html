@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Sports Intelligence - High-Fidelity News Feed</title>
+    <meta name="description" content="Hourly high-fidelity sports news intelligence. 50+ feeds, random staggered sync, advanced categorical filtering. V30.6.23.">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bmwseals.com/sports/">
+    <meta property="og:title" content="Sovereign Sports Intelligence - High-Fidelity News Feed">
+    <meta property="og:description" content="Hourly high-fidelity sports intelligence. 50+ feeds, random staggered sync, advanced categorical filtering. V30.6.23.">
+    <meta property="og:image" content="https://bmwseals.com/sports/og_image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bmwseals.com/sports/">
+    <meta property="twitter:title" content="Sovereign Sports Intelligence">
+    <meta property="twitter:description" content="Hourly high-fidelity sports intelligence. 50+ feeds, random staggered sync, advanced categorical filtering. V30.6.23.">
+    <meta property="twitter:image" content="https://bmwseals.com/sports/og_image.png">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Outfit:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23030712'/><text x='15' y='75' font-size='70'>⚡</text><text x='40' y='72' font-size='50' fill='white' font-family='Outfit, sans-serif' font-weight='900'>S</text></svg>">
+    <!-- Database loaded dynamically with cache busting -->
+    <style>
+        :root {
+            --bg-main: #030712;
+            --bg-card: #0b1120;
+            --accent: #10b981;
+            --gold: #f59e0b;
+            --text-main: #ffffff;
+            --text-dim: #cbd5e1;
+            --border: #1f2937;
+            --danger: #f43f5e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 900;
+            font-size: 24px;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            color: var(--accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0px;
+        }
+
+        .logo span {
+            color: var(--text-main);
+        }
+
+        .logo i {
+            font-style: normal;
+            color: var(--gold);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 900;
+            font-family: 'Outfit', sans-serif;
+            color: var(--gold);
+        }
+
+        .timezone-label {
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 3px;
+            line-height: 1;
+            display: block;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .news-card {
+            background: rgba(11, 17, 32, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px 18px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 240px;
+        }
+
+        .news-card:nth-child(even) {
+            background: rgba(16, 185, 129, 0.08);
+            border-left: 3px solid var(--accent);
+        }
+
+        .news-card:nth-child(odd) {
+            background: rgba(99, 102, 241, 0.08);
+            border-left: 3px solid #6366f1;
+        }
+
+        /* Dual-Tone Rail Update */
+
+        .news-card:nth-child(even):hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+            background: rgba(11, 17, 32, 0.8) !important;
+        }
+
+        .news-card:nth-child(odd):hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+            box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.15);
+            background: rgba(11, 17, 32, 0.8) !important;
+        }
+
+        .source-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 900;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .source-box {
+            background: #1e293b;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .category-text {
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-left: 10px;
+            flex-grow: 1;
+        }
+
+        .score-box {
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--accent);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .news-title {
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.3;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 2.6em;
+            /* Ensure consistent spacing */
+        }
+
+        .news-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .news-title a:hover {
+            color: var(--accent);
+        }
+
+        .news-summary {
+            font-size: 12px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin-bottom: 10px;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .meta-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-dim);
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+            margin-top: auto;
+        }
+
+        .time-relative {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent);
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.4;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 100px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 20px;
+            border: 2px dashed var(--border);
+        }
+
+        .empty-state h2 {
+            font-size: 24px;
+            color: var(--text-dim);
+            font-weight: 800;
+        }
+
+        /* Search Bar */
+        .search-area {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 14px 25px;
+            color: white;
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.2s;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #64748b;
+            padding: 12px 24px;
+            border-radius: 0;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-btn.active {
+            background: transparent;
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+            box-shadow: inset 0 -15px 20px -15px rgba(16, 185, 129, 0.15);
+            text-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .nav-container {
+            display: flex;
+            gap: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.2);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .nav-container::-webkit-scrollbar {
+            display: none;
+        }
+
+
+
+        .draggable-btn {
+            cursor: grab;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .draggable-btn:active {
+            cursor: grabbing;
+        }
+
+        .draggable-btn.dragging {
+            opacity: 0.5;
+            background: var(--border);
+        }
+
+        #syncBtn {
+            background: transparent;
+            color: var(--accent);
+            height: auto;
+            font-weight: 900;
+            border: none;
+            padding: 0;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .hide-mobile {
+                display: none !important;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: center;
+                padding: 6px 10px 0px 10px;
+                gap: 2px;
+            }
+
+            .logo {
+                align-items: center !important;
+                font-size: 14px;
+            }
+
+            .logo div[style*="margin-left: 12px"] {
+                margin-left: 0 !important;
+            }
+
+            .stats-bar {
+                justify-content: center;
+                gap: 20px;
+            }
+
+            #syncBtn {
+                display: none !important;
+            }
+
+            .container {
+                margin: 10px auto;
+                padding: 0 10px;
+            }
+
+            .search-area {
+                margin-bottom: 8px;
+                gap: 2px !important;
+            }
+
+            .search-input {
+                padding: 8px 15px !important;
+                font-size: 14px !important;
+            }
+
+            .nav-container {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                justify-content: center !important;
+                gap: 4px !important;
+                padding: 4px 0 !important;
+                background: transparent !important;
+                border: none !important;
+                overflow: visible !important;
+            }
+
+            .filter-btn {
+                padding: 6px 10px !important;
+                font-size: 10px !important;
+                border-bottom: 1px solid transparent !important;
+                flex: 0 1 auto !important;
+            }
+
+            .filter-btn.active {
+                border-bottom: 1.5px solid var(--accent) !important;
+                box-shadow: none !important;
+            }
+
+            .grid {
+                gap: 12px !important;
+            }
+
+            .news-card {
+                padding: 6px 12px !important;
+                gap: 5px !important;
+                min-height: auto !important;
+            }
+
+            .news-title {
+                font-size: 14px !important;
+                height: auto !important;
+                -webkit-line-clamp: 2 !important;
+            }
+
+            .news-summary {
+                font-size: 11px !important;
+                -webkit-line-clamp: 2 !important;
+                margin-bottom: 5px !important;
+            }
+
+            .meta-footer {
+                padding-top: 8px !important;
+            }
+
+            .tag-row {
+                margin-bottom: 5px !important;
+            }
+
+            .news-card:nth-child(even) {
+                background: rgba(30, 41, 59, 0.47) !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            }
+            /* Mobile Rhythm: Softened V3 */
+
+            /* Force sync nudge V2 */
+            .news-card:nth-child(odd) {
+                background: transparent !important;
+            }
+
+            .stat-item[style*="margin-right: 20px"] {
+                margin-right: 0 !important;
+            }
+
+            .search-input {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .nav-container {
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .filter-btn {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="logo">
+            <div>⚡ <span>SOVEREIGN</span> <i>SPORTS</i></div>
+            <div
+                style="font-size: 8px; color: var(--text-dim); font-weight: 700; letter-spacing: 1px; margin-top: -2px; margin-left: 12px;">
+                [ALL TIMES EST]</div>
+        </div>
+        <div class="stats-bar">
+
+            <div class="stat-item hide-mobile">
+                <div class="stat-label">HEADLINES</div>
+                <div class="stat-value" id="count-total">0</div>
+            </div>
+            <div class="stat-item hide-mobile">
+                <div class="stat-label">LATEST SYNC</div>
+                <div class="stat-value" id="sync-time" style="line-height: 1.1;">--:--</div>
+                <div class="timezone-label" id="sync-label">EST</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="search-area">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search leagues, teams, or players...">
+            <div id="mainNav" class="nav-container">
+                <!-- Navigation buttons injected by JS -->
+            </div>
+        </div>
+
+        <div class="search-area" id="racingSubNav"
+            style="display: none; justify-content: center; margin-top: -10px; margin-bottom: 20px;">
+            <button class="filter-btn active" onclick="filterCategory('RACING', 'ALL')">ALL RACING</button>
+            <button class="filter-btn" onclick="filterCategory('RACING', 'F1')">F1</button>
+            <button class="filter-btn" onclick="filterCategory('RACING', 'NASCAR')">NASCAR</button>
+            <button class="filter-btn" onclick="filterCategory('RACING', 'MOTOGP')">MOTOGP</button>
+        </div>
+
+        <div class="search-area" id="tennisSubNav"
+            style="display: none; justify-content: center; margin-top: -10px; margin-bottom: 20px;">
+            <button class="filter-btn active" onclick="filterCategory('TENNIS', 'ALL')">ALL TENNIS</button>
+            <button class="filter-btn" onclick="filterCategory('TENNIS', 'ATP')">ATP</button>
+            <button class="filter-btn" onclick="filterCategory('TENNIS', 'WTA')">WTA</button>
+        </div>
+
+        <div class="search-area" id="fightingSubNav"
+            style="display: none; justify-content: center; margin-top: -10px; margin-bottom: 20px;">
+            <button class="filter-btn active" onclick="filterCategory('FIGHTING', 'ALL')">ALL FIGHTING</button>
+            <button class="filter-btn" onclick="filterCategory('FIGHTING', 'MMA')">MMA</button>
+            <button class="filter-btn" onclick="filterCategory('FIGHTING', 'BOXING')">BOXING</button>
+        </div>
+        
+        <div class="search-area" id="collegeSubNav"
+            style="display: none; justify-content: center; margin-top: -10px; margin-bottom: 20px;">
+            <button class="filter-btn active" onclick="filterCategory('COLLEGE', 'ALL')">ALL COLLEGE</button>
+            <button class="filter-btn" onclick="filterCategory('COLLEGE', 'FOOTBALL')">FOOTBALL</button>
+            <button class="filter-btn" onclick="filterCategory('COLLEGE', 'BASKETBALL')">BASKETBALL</button>
+            <button class="filter-btn" onclick="filterCategory('COLLEGE', 'BASEBALL')">BASEBALL</button>
+            <button class="filter-btn" onclick="filterCategory('COLLEGE', 'SOFTBALL')">SOFTBALL</button>
+        </div>
+
+        <div id="newsGrid" class="grid"></div>
+    </div>
+
+    <script>
+        let currentFilter = localStorage.getItem('lastSportsFilter') || 'all';
+        let currentSubFilter = null;
+        let savedOrder = localStorage.getItem('sportsNavOrder');
+        let navOrder = savedOrder ? JSON.parse(savedOrder) : ['all', 'new', 'NFL', 'NBA', 'MLB', 'NHL', 'GOLF', 'WWE', 'SOCCER', 'RACING', 'TENNIS', 'COLLEGE', 'FIGHTING', 'GEN'];
+
+        // De-duplicate and normalize to ensure no 'NEW NEW' issues
+        const required = ['all', 'new', 'nfl', 'nba', 'mlb', 'nhl', 'golf', 'wwe', 'soccer', 'racing', 'tennis', 'college', 'fighting', 'gen'];
+        navOrder = [...new Set(navOrder.map(c => c.toLowerCase()))];
+        
+        // Ensure all required are present
+        required.forEach(r => {
+            if (!navOrder.includes(r)) {
+                // If GEN exists, insert before it
+                const genIdx = navOrder.indexOf('gen');
+                if (genIdx !== -1) {
+                    navOrder.splice(genIdx, 0, r);
+                } else {
+                    navOrder.push(r);
+                }
+            }
+        });
+
+        // Specific fix: Move fighting before gen if both exist
+        const fIdx = navOrder.indexOf('fighting');
+        const gIdx = navOrder.indexOf('gen');
+        if (fIdx !== -1 && gIdx !== -1 && fIdx > gIdx) {
+            navOrder.splice(fIdx, 1);
+            navOrder.splice(navOrder.indexOf('gen'), 0, 'fighting');
+        }
+        
+        localStorage.setItem('sportsNavOrder', JSON.stringify(navOrder));
+
+        function initNav() {
+            const container = document.getElementById('mainNav');
+            container.innerHTML = '';
+
+            navOrder.forEach(cat => {
+                const btn = document.createElement('button');
+                const isActive = (cat.toLowerCase() === currentFilter.toLowerCase());
+                btn.className = `filter-btn draggable-btn ${isActive ? 'active' : ''}`;
+                btn.innerText = cat.toUpperCase();
+                btn.draggable = true;
+
+                const sub = (['RACING', 'TENNIS', 'FIGHTING', 'COLLEGE'].includes(cat.toUpperCase())) ? 'ALL' : null;
+                btn.onclick = () => filterCategory(cat, sub);
+
+                btn.addEventListener('dragstart', (e) => {
+                    btn.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', cat);
+                });
+
+                btn.addEventListener('dragend', () => {
+                    btn.classList.remove('dragging');
+                    saveNavOrder();
+                });
+
+                container.appendChild(btn);
+            });
+
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const dragging = document.querySelector('.dragging');
+                const afterElement = getDragAfterElement(container, e.clientX);
+                if (afterElement == null) {
+                    container.appendChild(dragging);
+                } else {
+                    container.insertBefore(dragging, afterElement);
+                }
+            });
+        }
+
+        function getDragAfterElement(container, x) {
+            const draggableElements = [...container.querySelectorAll('.draggable-btn:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = x - box.left - box.width / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function saveNavOrder() {
+            const btns = [...document.querySelectorAll('.draggable-btn')];
+            navOrder = btns.map(btn => btn.innerText.toLowerCase() === 'all' ? 'all' : btn.innerText);
+            localStorage.setItem('sportsNavOrder', JSON.stringify(navOrder));
+        }
+
+        function timeAgo(dateString) {
+            try {
+                let ds = String(dateString);
+                // Check if it already has a timezone offset (ends with Z or +/-HH:mm or +/-HHmm)
+                const hasOffset = /([Z+-]\d{2}:?\d{2}|GMT)$/.test(ds);
+                
+                if (!hasOffset) {
+                    if (!ds.includes('T')) {
+                        ds = ds.replace(' ', 'T');
+                    }
+                    ds += '+02:00';
+                }
+
+                const date = new Date(ds);
+                if (isNaN(date.getTime())) {
+                    return { relative: "LIVE", absolute: "Invalid Date" };
+                }
+
+                const now = new Date();
+                const absolute = date.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'America/New_York'
+                });
+
+                if (date > now) {
+                    return { relative: "1 MINS AGO", absolute };
+                }
+
+                const diffInSeconds = Math.max(0, Math.floor((now - date) / 1000));
+                const totalMinutes = Math.floor(diffInSeconds / 60);
+
+                let relative = "";
+                if (totalMinutes < 60) {
+                    relative = `${Math.max(1, totalMinutes)} mins ago`;
+                } else if (totalMinutes < 1440) {
+                    const hours = Math.floor(totalMinutes / 60);
+                    const mins = totalMinutes % 60;
+                    relative = `${hours} ${hours === 1 ? 'hr' : 'hrs'}`;
+                    if (mins > 0) relative += ` ${mins} mins`;
+                    relative += ' ago';
+                } else {
+                    const totalHours = Math.floor(totalMinutes / 60);
+                    const days = Math.floor(totalHours / 24);
+                    const hrs = totalHours % 24;
+                    relative = `${days} ${days === 1 ? 'day' : 'days'}`;
+                    if (hrs > 0) relative += ` ${hrs} hrs`;
+                    relative += ' old';
+                }
+                return { relative: relative.toUpperCase(), absolute };
+            } catch (e) { return { relative: "LIVE", absolute: "Invalid Date" }; }
+        }
+
+        function render() {
+            if (!window.sports_news) return;
+            const container = document.getElementById('newsGrid');
+            container.innerHTML = '';
+            const query = document.getElementById('searchInput').value.toLowerCase();
+
+            const filtered = window.sports_news.filter(item => {
+                if (item.primary_category.toUpperCase() === 'OLYMPICS') return false;
+
+                const matchesSearch = item.title.toLowerCase().includes(query) || item.summary.toLowerCase().includes(query);
+                let itemCat = item.primary_category.toLowerCase();
+                let matchesCategory = (currentFilter === 'all' || currentFilter === 'new') ||
+                    (itemCat === currentFilter.toLowerCase()) ||
+                    (currentFilter === 'gen' && itemCat === 'general');
+                if (matchesCategory && currentSubFilter && currentSubFilter !== 'ALL') {
+                    matchesCategory = (item.sub_category && item.sub_category.toLowerCase() === currentSubFilter.toLowerCase());
+                }
+                return matchesSearch && matchesCategory;
+            });
+
+            if (currentFilter === 'new') {
+                filtered.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
+            } else {
+                filtered.sort((a, b) => (b.hot_score || b.score || 0) - (a.hot_score || a.score || 0));
+            }
+
+            const countEl = document.getElementById('count-total');
+            if (countEl) countEl.innerText = filtered.length;
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'news-card';
+                const timeInfo = timeAgo(item.published_at);
+                const cleanSource = item.source.split(' - ')[0].trim();
+                let displayTag = (item.primary_category.toUpperCase() === 'GENERAL' ? 'GEN' : item.primary_category).toUpperCase();
+                const cleanSub = (item.sub_category || '').toUpperCase();
+                const ignoreSubs = ['GENERAL', 'NEWS', 'TOP', 'TRENDING', 'ANALYSIS', 'OPINION'];
+                if (cleanSub && !ignoreSubs.includes(cleanSub) && cleanSub !== displayTag) {
+                    displayTag += ` : ${cleanSub}`;
+                }
+
+                card.innerHTML = `
+                <div class="tag-row">
+                    <div class="source-box">${cleanSource}</div>
+                    <div class="category-text">${displayTag}</div>
+                    <div class="score-box">${item.score || 50}</div>
+                </div>
+                <h3 class="news-title"><a href="${item.url}" target="_blank">${item.title}</a></h3>
+                <p class="news-summary">${item.summary}</p>
+                <div class="meta-footer">
+                    <div class="time-relative"><div class="pulse-dot"></div><span>${timeInfo.relative}</span></div>
+                    <div class="time-absolute">${timeInfo.absolute}</div>
+                </div>
+            `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat, sub) {
+            currentFilter = cat.toLowerCase();
+            currentSubFilter = sub ? sub.toUpperCase() : null;
+            localStorage.setItem('lastSportsFilter', currentFilter);
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.toLowerCase() === currentFilter || (currentFilter === 'all' && btn.innerText.toLowerCase() === 'all'));
+            });
+            document.getElementById('racingSubNav').style.display = (currentFilter === 'racing') ? 'flex' : 'none';
+            document.getElementById('tennisSubNav').style.display = (currentFilter === 'tennis') ? 'flex' : 'none';
+            document.getElementById('fightingSubNav').style.display = (currentFilter === 'fighting') ? 'flex' : 'none';
+            document.getElementById('collegeSubNav').style.display = (currentFilter === 'college') ? 'flex' : 'none';
+            render();
+        }
+
+
+
+        document.getElementById('searchInput').addEventListener('input', render);
+
+        window.onload = () => {
+            // Dynamic loading with cache busting
+            const script = document.createElement('script');
+            script.src = `./database/sports_news.js?v=${Date.now()}`;
+            script.onload = () => {
+                initNav();
+                if (window.sports_news && window.sports_news.length > 0) {
+                    const latest = window.sports_news[0];
+                    // Standardize display to Eastern Time regardless of scraper string
+                    const syncDate = new Date(latest.published_at);
+                    document.getElementById('sync-time').innerText = latest.sync_time || syncDate.toLocaleTimeString('en-US', { 
+                        timeZone: 'America/New_York', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    
+                    // Add date to sync label
+                    const dateStr = syncDate.toLocaleDateString('en-US', {
+                        timeZone: 'America/New_York',
+                        month: 'numeric',
+                        day: 'numeric',
+                        year: '2-digit'
+                    });
+                    const labelEl = document.getElementById('sync-label');
+                    if (labelEl) labelEl.innerText = `${dateStr} EST`;
+                }
+                render();
+            };
+            document.head.appendChild(script);
+        };
+    </script>
+</body>
+
+</html>
