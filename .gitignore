@@ -1,38 +1,55 @@
-node_modules/
+# ============================================================
+# Sovereign Sports Intelligence - .gitignore
+# ============================================================
+
+# --- Python ---
 __pycache__/
 *.pyc
-logs/
-*.txt
-scratch/
-backup/
-archive/
-gigacpo_llm_handoff.md
-cpo_master_ultimate.csv
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
 
-# Ignore contents of database but keep whitelisted files
-database/*
-!database/name_aliases.json
-!database/bridge_dead_tickers.json
-!database/ticker_name_map.json
-!database/monitored_users.json
-!database/CPO_MASTER_DATA.json
-!database/AI_MASTER_DATA.json
+# --- Node ---
+node_modules/
 
-# Build artifacts
+# --- Build Artifacts ---
 dist/
 intel.js
 
-.gemini/
-.agent/
-.agents/
-.pytest_cache/
-.cursorrules
-credentials/
-.env
+# --- Database: Keep only the live payload ---
+database/*
+!database/sports_news.js
 
-# Temporary / Scratch
+# --- Logs & Diagnostics (internal/troubleshooting only) ---
+*.log
+*.txt
+logs/
+
+# --- Scratch & Temporary ---
+scratch/
 scratch_*.py
 _*.py
 verify_*.py
-HTML-EMAIL-HANDOVER.md
+
+# --- Secrets & Credentials ---
+.env
+credentials/
+
+# --- IDE / Tooling ---
 .vscode/
+.gemini/
+.agent/
+.agents/
+.cursorrules
+.pytest_cache/
+
+# --- Archive & Backup ---
+backup/
+archive/
+
+# --- Legacy / One-off files ---
+gigacpo_llm_handoff.md
+cpo_master_ultimate.csv
+HTML-EMAIL-HANDOVER.md
